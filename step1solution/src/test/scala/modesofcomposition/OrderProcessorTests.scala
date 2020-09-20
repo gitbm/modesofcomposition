@@ -16,7 +16,7 @@ class OrderProcessorTests extends munit.FunSuite {
 
     val orderMsg = OrderProcessor.decodeMsg[F](msg.getBytes).unsafeRunSync()
 
-    val expected = OrderMsg(customerIdStr, NonEmptyChain((rabbitCode -> 2)))
+    val expected = OrderMsg(customerIdStr, zio.NonEmptyChunk(OrderSkuQuantity(rabbitCode -> 2)))
 
     assertEquals(orderMsg, expected)
   }

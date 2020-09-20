@@ -5,8 +5,10 @@
 *.png~
 *.png.kra
 
-project/target
+target
 target
 .bloop
 .metals
-project/metals.sbt
+**/metals.sbt
+.vscode
+

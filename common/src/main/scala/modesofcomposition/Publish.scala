@@ -1,10 +1,17 @@
 package modesofcomposition
 
-/** Models a topic-oriented message publication service */
-trait Publish[F[_]] {
+import zio.ZIO
 
-  /** Sends msg bytes to a named topic */
-  def publish(topic: String, msg: Array[Byte]): F[Unit]
+/** Models a topic-oriented message publication service */
+object Publish {
+  trait Service {
+
+    /** Sends msg bytes to a named topic */
+    def publish(topic: String, msg: Array[Byte]): zio.IO[AppError, Unit]
+  }
+
+  def publish(topic: String, msg: Array[Byte]): ZIO[Publish, AppError, Unit] =
+    ZIO.accessM(_.get.publish(topic, msg))
 }
 
 object Topic {

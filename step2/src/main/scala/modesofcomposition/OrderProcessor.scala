@@ -6,34 +6,20 @@ package modesofcomposition
 // import cats.effect.{Sync, implicits}
 // import cats.mtl.implicits
 
+import zio.{RIO, ZIO}
+
 object OrderProcessor {
 
   //resolveOrderMsg has been broken down into named parts to help understand the pieces of the computation
 
-  def resolveOrderMsg[F[_]: Sync: Parallel: SkuLookup: CustomerLookup](msg: OrderMsg): F[CustomerOrder] =
-    msg match { case OrderMsg(custIdStr, items) =>
+  def resolveOrderMsg(msg: OrderMsg): ZIO[SkuLookup with CustomerLookup, AppError, CustomerOrder] = {
 
-      val resolveCustomer: F[Customer] =
-        for {
-          cust_eith <- F.resolveCustomerId(custIdStr)
-          cust <- errorValueFromEither[F](cust_eith)
-        } yield cust
+    val resolveSkus = ZIO.foreach(msg.skuQuantities) { item =>
+      ZIO.mapN(SkuLookup.resolveSku(item.name), PosInt.toZio(item.quantity))(SkuQuantity(_, _))
+    }
 
-      val resolveSkuQuantity: ((String, Int)) => F[SkuQuantity] = { case (name, quantity) =>
-        for {
-          sku_eith <- F.resolveSku(name)
-          sku <- errorValueFromEither[F](sku_eith)
-          q <- PosInt.fromF[F](quantity)
-        } yield SkuQuantity(sku, q)
-      }
-
-      val resolveSkus: F[NonEmptyChain[SkuQuantity]] = items.parTraverse(resolveSkuQuantity)
-
-      //applicative composition
-      (
-        resolveCustomer,
-        resolveSkus,
-        ).parMapN(CustomerOrder(_, _))
+    // Could do mapParN here and above but no real benefit here
+    ZIO.mapN(CustomerLookup.resolveCustomerId(msg.customerId), resolveSkus)(CustomerOrder(_, _))        
     }
 }
 

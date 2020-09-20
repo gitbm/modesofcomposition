@@ -11,30 +11,36 @@ import scala.util.control.NonFatal
  *
  * Optionally, a stack trace can be recorded at the time the error value is created (default=false).
  * */
-case class ErrorValue[E: ClassTag](e: E, stackTrace: Boolean = false) extends Throwable(
-  e.toString, null, false, stackTrace)
+
+trait AppError 
+
+case class StringError(str: String) extends AppError
+
+
+// case class ErrorValue[E: ClassTag](e: E, stackTrace: Boolean = false) extends AppError(
+//   e.toString, null, false, stackTrace)
 
 trait ErrorValueSupport {
 
-  /** Raise the value `e` as an error. Requires a ApplicativeError error effect in F. */
-  def raiseErrorValue[F[_], E: ClassTag](e: E, stackTrace: Boolean = false)(implicit F: ApplicativeError[F, Throwable]) =
-    F.raiseError(new ErrorValue(e, stackTrace))
+  // /** Raise the value `e` as an error. Requires a ApplicativeError error effect in F. */
+  // def raiseErrorValue[F[_], E: ClassTag](e: E, stackTrace: Boolean = false)(implicit F: ApplicativeError[F, Throwable]) =
+  //   F.raiseError(new ErrorValue(e, stackTrace))
 
-  /**Convert an Either[E, A] into an F[A] by raising the E if required. Requires a MonadError error effect in F. */
-  def errorValueFromEither[F[_]] = new ErrorValueFromEitherPartiallyApplied[F]
+  // /**Convert an Either[E, A] into an F[A] by raising the E if required. Requires a MonadError error effect in F. */
+  // def errorValueFromEither[F[_]] = new ErrorValueFromEitherPartiallyApplied[F]
 
-  class ErrorValueFromEitherPartiallyApplied[F[_]] {
+  // class ErrorValueFromEitherPartiallyApplied[F[_]] {
 
-    def apply[A, E: ClassTag](e: =>Either[E, A], stackTrace: Boolean = false)(
-      implicit F: ApplicativeError[F, Throwable]): F[A] = try {
-      e match {
-        case Right(a) => F.pure(a)
-        case Left(t: Throwable) => F.raiseError[A](t)
-        case Left(value: E) => F.raiseError[A](new ErrorValue(value, stackTrace))
-      }
-    } catch {
-      case NonFatal(t) => F.raiseError(t)
-    }
-  }
+  //   def apply[A, E: ClassTag](e: =>Either[E, A], stackTrace: Boolean = false)(
+  //     implicit F: ApplicativeError[F, Throwable]): F[A] = try {
+  //     e match {
+  //       case Right(a) => F.pure(a)
+  //       case Left(t: Throwable) => F.raiseError[A](t)
+  //       case Left(value: E) => F.raiseError[A](new ErrorValue(value, stackTrace))
+  //     }
+  //   } catch {
+  //     case NonFatal(t) => F.raiseError(t)
+  //   }
+  // }
 
 }

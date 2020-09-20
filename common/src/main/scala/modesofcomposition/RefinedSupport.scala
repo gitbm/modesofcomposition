@@ -14,6 +14,10 @@ trait RefinedSupport {
     def fromF[F[_]](a: A)(implicit F:  MonadError[F, Throwable], v: Validate[A, P]): F[Refined[A, P]] =
       F.fromEither(refineV[P](a).leftMap(e => new IllegalStateException(s"Refinement failed on $a: $e")))
 
+
+    def toZio(a: A)(implicit v: Validate[A, P]): zio.IO[StringError, Refined[A, P]] =
+      zio.ZIO.fromEither(refineV[P](a).leftMap(e => StringError(s"Refinement failed on $a: $e")))
+
   }
 
 }

@@ -1,28 +1,14 @@
 package modesofcomposition
 
-import io.circe.parser
-
-//import modesofcomposition.errorValueFromEither
+import io.circe.{parser, Encoder, Decoder, NonEmptySeqDecoder}
+import zio._
+import scala.util.Success
 
 object OrderProcessor {
-
-  def decodeMsg[F[_]: ApplicativeError[*[_], Throwable]](msg: Array[Byte]): F[OrderMsg] = {
-    val decoded = parser.decode[OrderMsg](new String(msg))
-   
-    println("decoded = " + decoded)
-
-    val f_msg = errorValueFromEither(decoded)
-
-    println("msg = " + msg)
-
-    //errorValueFromEither[F](parser.decode[OrderMsg](new String(msg)))
-
-    f_msg
+  def decodeMsg(msg: Array[Byte]): ZIO[Any, Throwable, OrderMsg] = {
+      
+    ZIO.fromEither(parser.decode[OrderMsg](new String(msg)))
   }
-
-  val decoded = ...
-  errorValueFromEither(decoded)
-  errorValueFromEither[F](decoded)
 
 }
 

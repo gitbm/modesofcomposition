@@ -1,8 +1,10 @@
 package modesofcomposition
 
-class OrderProcessorTests extends munit.FunSuite {
+import zio.Runtime.default.unsafeRun
 
-  type F[X] = IO[X]
+import TestSupport._
+
+class OrderProcessorTests extends munit.FunSuite {
 
   val rabbitCode = "Rabbit"
   val customerIdStr = "12345"
@@ -11,12 +13,11 @@ class OrderProcessorTests extends munit.FunSuite {
     val msg =
       s"""{
         |"customerId": "$customerIdStr",
-        |"skuQuantities": [["${rabbitCode}", 2]]
+        |"skuQuantities": [ { "name": "${rabbitCode}", "quantity": 2 } ]
         |}""".stripMargin
 
-    val orderMsg = OrderProcessor.decodeMsg[F](msg.getBytes).unsafeRunSync()
-
-    val expected = OrderMsg(customerIdStr, NonEmptyChain((rabbitCode -> 2)))
+    val orderMsg = run(OrderProcessor.decodeMsg(msg.getBytes))
+    val expected = OrderMsg(customerIdStr, zio.NonEmptyChunk(OrderSkuQuantity(rabbitCode, 2)))
 
     assertEquals(orderMsg, expected)
   }

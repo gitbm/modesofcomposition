@@ -44,6 +44,8 @@ val imports = Array(
 )
 val circeVersion = "0.12.3"
 
+val zioVersion = "1.0.1"
+
 val commonSettings = Seq(
   scalaVersion := "2.13.2",
   scalacOptions += s"-Yimports:${imports.mkString(",")}",
@@ -67,9 +69,17 @@ val commonSettings = Seq(
     "eu.timepit" %% "refined-cats" % "0.9.14",
     "io.chrisdavenport" %% "cats-effect-time" % "0.1.2",
     "org.scalameta" %% "munit" % "0.7.7" % Test,
+    "dev.zio" %% "zio"               % zioVersion,
+    "dev.zio" %% "zio-test"          % zioVersion % "test",
+    "dev.zio" %% "zio-test-sbt"      % zioVersion % "test",
+    "dev.zio" %% "zio-test-magnolia" % zioVersion % "test"
+
   ),
   //munit is a simple, modern alternative to the complexity of ScalaTest & Specs2
-  testFrameworks += new TestFramework("munit.Framework")
+  testFrameworks ++= Seq(
+    new TestFramework("munit.Framework"),
+    new TestFramework("zio.test.sbt.ZTestFramework")
+  )
 )
 
 val testWorking = TaskKey[Unit]("testWorking", "Compile all problems and run all solution tests")
