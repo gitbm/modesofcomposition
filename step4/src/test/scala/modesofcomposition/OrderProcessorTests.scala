@@ -20,7 +20,7 @@ class OrderProcessorTests extends munit.FunSuite with TestSupport {
       TestState.get
     )
 
-    val expected = Chain(Dispatched(order, Instant.ofEpochMilli(currMillis), UuidSeed.uuid(seed))).asRight[io.circe.Error]
+    val expected = Chain(Dispatched(order, Instant.ofEpochMilli(currMillis), seed.uuid)).asRight[io.circe.Error]
 
     assertEquals(testState.getMessages(Topic.Dispatch).traverse(fromJsonBytes[Dispatched]), expected)
 
@@ -75,7 +75,7 @@ class OrderProcessorTests extends munit.FunSuite with TestSupport {
       SkuQuantity(toyHippo, PosInt(2)),
     ))
     val actual = run((Uuids.initSeed(seed) *> OrderProcessor.dispatch(order)))
-    assertEquals(actual, Dispatched(order, Instant.ofEpochMilli(currMillis), UuidSeed.uuid(seed)))
+    assertEquals(actual, Dispatched(order, Instant.ofEpochMilli(currMillis), seed.uuid))
   }
 
   test("insufficientsAndTaken") {

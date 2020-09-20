@@ -9,8 +9,6 @@ package object modesofcomposition extends RefinedSupport with ErrorValueSupport 
   type Inventory = Has[Inventory.Service]
   type Publish = Has[Publish.Service]
 
-  //type UuidRef[F[_]] = Ref[F, UuidSeed]
-  type UuidRef = Has[zio.Ref[UuidSeed]]
   type Uuids = Has[Uuids.Service]
 
   import zio.NonEmptyChunk, io.circe.{Encoder, Decoder}, scala.util.Success

@@ -10,15 +10,14 @@ import zio.random.Random
  * space of UUIDs.  */
 final case class UuidSeed(seeds: Array[Long]) {
   require(seeds.length == 4)
-}
-
-object UuidSeed {
+    
   //https://en.wikipedia.org/wiki/Linear_congruential_generator
-  def permute(l: Long) = l * 6364136223846793005L + 1442695040888963407L
+  private def permute(l: Long) = l * 6364136223846793005L + 1442695040888963407L
 
-  def next(curr: UuidSeed) = UuidSeed(curr.seeds.map(permute))
+  def next: UuidSeed = UuidSeed(seeds.map(permute))
 
-  def uuid(curr: UuidSeed) = new UUID(curr.seeds(0) ^ curr.seeds(1), curr.seeds(2) ^ curr.seeds(3))
+  def uuid: UUID = new UUID(seeds(0) ^ seeds(1), seeds(2) ^ seeds(3))
+
 }
 
 object Uuids {
@@ -54,19 +53,12 @@ object Uuids {
         def nextUuid: UIO[UUID] = 
           for {
             seed <- ref.get
-            uuid = UuidSeed.uuid(seed)
-            _ <- ref.set(UuidSeed.next(seed))
+            uuid = seed.uuid
+            _ <- ref.set(seed.next)
           } yield uuid
       }
     } yield svc
   }
 }
 
-
-
-  //   trait Service {
-    //   def newSeed: UIO[UuidSeed] = F.delay(UuidSeed(Array.fill(4)(scala.util.Random.nextLong())))
-
-    //   def nextUuid[F[_]: Functor: UuidRef]: F[UUID] = F.getAndUpdate(_.next).map(_.uuid)
-  // }
 

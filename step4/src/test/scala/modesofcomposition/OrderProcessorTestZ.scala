@@ -16,7 +16,7 @@ object OrderProcessTestZ extends DefaultRunnableSpec {
     testM("processAvailableOrder - dispatch") {
       val order = CustomerOrder(ausCustomer,
         NonEmptyChunk(SkuQuantity(toyRabbit, refineMV[Positive](1))))
-      val expected = Chain(Dispatched(order, Instant.ofEpochMilli(currMillis), UuidSeed.uuid(seed))).asRight[io.circe.Error]
+      val expected = Chain(Dispatched(order, Instant.ofEpochMilli(currMillis), seed.uuid)).asRight[io.circe.Error]
       
         for {
           _ <- Uuids.initSeed(seed) *> OrderProcessor.processAvailableOrder(order)
@@ -73,7 +73,7 @@ object OrderProcessTestZ extends DefaultRunnableSpec {
       ))
       for {
         dispatch <- Uuids.initSeed(seed) *> OrderProcessor.dispatch(order)
-      } yield assert(dispatch)(equalTo(Dispatched(order, Instant.ofEpochMilli(currMillis), UuidSeed.uuid(seed))))
+      } yield assert(dispatch)(equalTo(Dispatched(order, Instant.ofEpochMilli(currMillis), seed.uuid)))
     }.provideCustomLayer(defaultLayer),
 
     test("insufficientsAndTaken") {
